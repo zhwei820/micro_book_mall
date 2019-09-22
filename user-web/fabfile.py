@@ -12,15 +12,9 @@ from fabric.api import (
 
 env.user = 'opt'
 
-TEST_ENV = '10.9.255.115'
+TEST_NODE1 = '10.9.255.115'
 PRO_ENV_NODE1 = '129.204.161.53'
 PRO_ENV_NODE2 = '129.204.161.6'
-
-ENVS = {
-    'test': [{'ip': TEST_ENV, 'user': 'root'}],
-    'pro': [{'ip': PRO_ENV_NODE1, 'user': 'opt'},
-            {'ip': PRO_ENV_NODE2, 'user': 'opt'}],
-}
 
 SRC_DIR = '/data/opt/user-web'
 TAR_DIR = '/data/opt/'
@@ -32,8 +26,8 @@ def get_passwd(env=None):
     :param env:
     :return:
     '''
-    if env == TEST_ENV:
-        return 'qixinchatestroot'
+    if env.tolower() == 'test':
+        return 'rootroot'
     return 'root'
 
 
@@ -61,7 +55,7 @@ def backup(envip=None):
         local('mkdir ./backup -p')
         local(exec_str)
     else:
-        with cd('/data/deploy_app/user-web'):
+        with cd('/data/opt/user-web'):
             run('mkdir ./backup -p')
             run(exec_str)
 
@@ -81,7 +75,7 @@ def recovery(envip=None, sql_file=None):
 
 
 @task
-def create_db(db='sirius'):
+def create_db(db='micro_book_mall'):
     '''
     create db if db not exists
     '''
@@ -92,7 +86,7 @@ def create_db(db='sirius'):
 
 
 @task
-def drop_db(db='sirius'):
+def drop_db(db='micro_book_mall'):
     '''
     drop db
     '''
@@ -104,37 +98,42 @@ def drop_db(db='sirius'):
 
 def service_restart(env='prod'):
     with cd(SRC_DIR):
-        run('docker-compose pull %s' % env)
+        run('make start %s' % env)
+
+
+def make_build():
+    local('make build')
+
+
+def sync_exe(node):
+    local('rsync -r user-web %s:/data/opt/user-web' % (env.user + '@' + node))
 
 
 @task
-def deploy_test_docker(branch='dev'):
+def deploy_pro():
     '''
-    从gitlab 发布测试环境
     '''
-    env.user = 'root'
-    sync_src_code('test')
-    execute(copy_exec, hosts=[TEST_ENV])
-    execute(service_restart, 'test', hosts=[TEST_ENV])
-
-
-@task
-def deploy_pro_docker(branch='master'):
-    '''
-    从gitlab 发布生产环境
-    '''
-    sync_src_code('pro')
-    execute(copy_exec, hosts=[PRO_ENV_NODE1])
-    execute(service_restart, 'prod', hosts=[PRO_ENV_NODE1])
-    execute(copy_exec, hosts=[PRO_ENV_NODE2])
-    execute(service_restart, 'prod', hosts=[PRO_ENV_NODE2])
+    env.user = 'opt'
+    for node in (PRO_ENV_NODE1, PRO_ENV_NODE2):
+        make_build()
+        sync_exe(node)
+        execute(service_restart, 'prod', hosts=[node])
 
 
 @task
 def deploy_test():
+    '''
+    '''
+    env.user = 'root'
+    for node in (TEST_NODE1):
+        make_build()
+        sync_exe(node)
+        execute(service_restart, 'prod', hosts=[node])
+
+@task
+def deploy_test_from_local():
     """
-    :return:
     """
     env.user = 'root'
-    local('rsync -r user-web %s:/data/opt/user-web' % (env.user + '@' + TEST_ENV))
-    execute(service_restart, 'test', hosts=[TEST_ENV])
+    sync_exe(TEST_NODE1)
+    execute(service_restart, 'test', hosts=[TEST_NODE1])

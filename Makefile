@@ -46,3 +46,7 @@ restartall:
 	export ConfigAddress=192.168.1.4:9600; cd ./payment-web; ps -ef|grep payment-web|grep -v grep|cut -c 9-15|xargs kill -9 | true; nohup ./payment-web &>nohup.out; nohup ./payment-web &>nohup.out; nohup ./payment-web &>nohup.out;
 	export ConfigAddress=192.168.1.4:9600; cd ./user-srv; ps -ef|grep user-srv|grep -v grep|cut -c 9-15|xargs kill -9 | true; nohup ./user-srv &>nohup.out; nohup ./user-srv &>nohup.out; nohup ./user-srv &>nohup.out;
 	export ConfigAddress=192.168.1.4:9600; cd ./user-web; ps -ef|grep user-web|grep -v grep|cut -c 9-15|xargs kill -9 | true; nohup ./user-web &>nohup.out; nohup ./user-web &>nohup.out; nohup ./user-web &>nohup.out;
+
+.PHONY: docker
+docker:
+	docker build . -t micro-web:latest

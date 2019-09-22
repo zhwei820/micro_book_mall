@@ -18,6 +18,8 @@ mod.bat
 __pycache__
 *.pyc
 
+vendor
+
 config-grpc-srv/config-grpc-srv
 auth/auth-srv
 inventory-srv/inventory-srv
