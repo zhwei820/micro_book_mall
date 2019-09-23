@@ -1,18 +1,20 @@
 # coding: utf-8
 import datetime
+
 from fabric.api import (
     local,
     cd,
     run,
     execute,
     env,
-    lcd,
     task
 )
 
 env.user = 'opt'
 
 TEST_NODE1 = '10.9.255.115'
+TEST_NODE1 = '172.17.0.8'
+
 PRO_ENV_NODE1 = '129.204.161.53'
 PRO_ENV_NODE2 = '129.204.161.6'
 
@@ -20,13 +22,21 @@ SRC_DIR = '/data/opt/user-web'
 TAR_DIR = '/data/opt/'
 
 
-def get_passwd(env=None):
+def get_supervisor_env(env='test'):
+    if env.lower() == 'test':
+        return 'export ConfigAddress=10.35.195.56:9600;'
+    if env.lower() == 'prod':
+        return 'export ConfigAddress=10.35.195.56:9600;'
+    return ''
+
+
+def get_passwd(env='test'):
     '''
     获取开发,测试环境mysql密码
     :param env:
     :return:
     '''
-    if env.tolower() == 'test':
+    if env.lower() == 'test':
         return 'rootroot'
     return 'root'
 
@@ -81,7 +91,8 @@ def create_db(db='micro_book_mall'):
     '''
     local(
         'docker exec -it {db_env} mysql -uroot -proot -e '
-        '"CREATE DATABASE IF NOT EXISTS {db} default character set utf8mb4 collate utf8mb4_unicode_ci;;"'.format(db=db, db_env=config.db_env)
+        '"CREATE DATABASE IF NOT EXISTS {db} default character set utf8mb4 collate utf8mb4_unicode_ci;;"'.format(db=db,
+                                                                                                                 db_env=config.db_env)
     )
 
 
@@ -97,8 +108,10 @@ def drop_db(db='micro_book_mall'):
 
 
 def service_restart(env='prod'):
+    run('mkdir -p /data/user-web/log')
     with cd(SRC_DIR):
-        run('make start %s' % env)
+        run('%s supervisord -c /data/opt/user-web/deploy/supervisord.conf' % get_supervisor_env(env))
+        run('supervisorctl restart user_web ')
 
 
 def make_build():
@@ -106,7 +119,9 @@ def make_build():
 
 
 def sync_exe(node):
-    local('rsync -r user-web %s:/data/opt/user-web' % (env.user + '@' + node))
+
+    local('rsync -r user-web %s:/data/opt/user-web/' % (env.user + '@' + node))
+    local('rsync -r deploy %s:/data/opt/user-web/' % (env.user + '@' + node))
 
 
 @task
@@ -129,6 +144,7 @@ def deploy_test():
         make_build()
         sync_exe(node)
         execute(service_restart, 'prod', hosts=[node])
+
 
 @task
 def deploy_test_from_local():

@@ -6,3 +6,4 @@ RUN pip2 install fabric==1.14 -i https://pypi.douban.com/simple
 
 WORKDIR /code
 ADD . /code
+# ADD . /code
