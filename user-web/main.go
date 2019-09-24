@@ -5,11 +5,13 @@ import (
 	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/basic"
 	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/basic/common"
 	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/basic/config"
+	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/plugins/breaker"
 	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/user-web/handler"
 	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/utils/env-config"
 	"github.com/micro/cli"
 	"github.com/micro/go-micro/registry"
 	"github.com/micro/go-micro/registry/consul"
+	"net/http"
 
 	logzap "github.com/micro-in-cn/tutorials/microservice-in-micro/part5/plugins/zap"
 	"github.com/micro/go-micro/web"
@@ -41,7 +43,6 @@ func main() {
 		web.Name(cfg.Name),
 		web.Version(cfg.Version),
 		web.Registry(micReg),
-
 	)
 
 	// 初始化服务
@@ -56,7 +57,7 @@ func main() {
 	}
 
 	// 注册登录接口
-	service.HandleFunc("/user/login", handler.Login)
+	service.Handle("/user/login", breaker.BreakerWrapper(http.HandlerFunc(handler.Login)))
 	// 注册退出接口
 	service.HandleFunc("/user/logout", handler.Logout)
 	service.HandleFunc("/user/test", handler.TestSession)

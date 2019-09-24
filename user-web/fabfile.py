@@ -24,9 +24,9 @@ TAR_DIR = '/data/opt/'
 
 def get_supervisor_env(env='test'):
     if env.lower() == 'test':
-        return 'export ConfigAddress=10.35.195.56:9600;'
+        return 'export ConfigAddress=10.9.141.21:9600;'
     if env.lower() == 'prod':
-        return 'export ConfigAddress=10.35.195.56:9600;'
+        return 'export ConfigAddress=10.9.141.21:9600;'
     return ''
 
 
