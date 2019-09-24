@@ -110,8 +110,8 @@ def drop_db(db='micro_book_mall'):
 def service_restart(env='prod'):
     run('mkdir -p /data/user-web/log')
     with cd(SRC_DIR):
-        run('%s supervisord -c /data/opt/user-web/deploy/supervisord.conf' % get_supervisor_env(env))
-        run('supervisorctl restart user_web ')
+        run('%s supervisord -c /data/opt/user-web/deploy/supervisord.conf | true ' % get_supervisor_env(env))
+        run('supervisorctl -c /data/opt/user-web/deploy/supervisord.conf restart user_web ')
 
 
 def make_build():
@@ -119,7 +119,6 @@ def make_build():
 
 
 def sync_exe(node):
-
     local('rsync -r user-web %s:/data/opt/user-web/' % (env.user + '@' + node))
     local('rsync -r deploy %s:/data/opt/user-web/' % (env.user + '@' + node))
 
