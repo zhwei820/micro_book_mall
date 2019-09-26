@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/utils/env-config"
 	"time"
 
 	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/basic"
@@ -14,9 +13,7 @@ import (
 	logzap "github.com/micro-in-cn/tutorials/microservice-in-micro/part5/plugins/zap"
 	"github.com/micro/cli"
 	"github.com/micro/go-micro"
-	"github.com/micro/go-micro/registry"
 	"github.com/micro/go-micro/registry/consul"
-	"github.com/micro/go-plugins/config/source/grpc"
 )
 
 var (
@@ -34,10 +31,11 @@ type appCfg struct {
 
 func main() {
 	// 初始化配置、数据库等信息
+	basic.InitAppCfg(appName)
 	initCfg()
 
 	// 使用consul注册
-	micReg := consul.NewRegistry(registryOptions)
+	micReg := consul.NewRegistry(basic.RegistryOptions)
 
 	// 新建服务
 	service := micro.NewService(
@@ -68,23 +66,7 @@ func main() {
 	}
 }
 
-func registryOptions(ops *registry.Options) {
-	consulCfg := &common.Consul{}
-	err := config.C().App("consul", consulCfg)
-	if err != nil {
-		panic(err)
-	}
-
-	ops.Addrs = []string{fmt.Sprintf("%s:%d", consulCfg.Host, consulCfg.Port)}
-}
-
 func initCfg() {
-	source := grpc.NewSource(
-		grpc.WithAddress(env_config.EnvConfig.ConfigAddress),
-		grpc.WithPath("micro"),
-	)
-
-	basic.Init(config.WithSource(source))
 
 	err := config.C().App(appName, cfg)
 	if err != nil {

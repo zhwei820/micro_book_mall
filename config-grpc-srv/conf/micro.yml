@@ -3,6 +3,8 @@ micro:
     enabled: true
     host: 10.35.195.58
     port: 8501
+    registryttl: 5
+    timeoutttl: 8
   db:
     mysql:
       enabled: true

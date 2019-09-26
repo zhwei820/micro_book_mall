@@ -1,7 +1,12 @@
 package basic
 
 import (
+	"fmt"
+	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/basic/common"
 	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/basic/config"
+	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/utils/env-config"
+	"github.com/micro/go-micro/registry"
+	"github.com/micro/go-plugins/config/source/grpc"
 )
 
 var (
@@ -28,4 +33,26 @@ func Init(opts ...config.Option) {
 
 func Register(f func()) {
 	pluginFuncs = append(pluginFuncs, f)
+}
+
+func RegistryOptions(ops *registry.Options) {
+	consulCfg := &common.Consul{}
+	err := config.C().App("consul", consulCfg)
+	if err != nil {
+		panic(err)
+	}
+	ops.Addrs = []string{fmt.Sprintf("%s:%d", consulCfg.Host, consulCfg.Port)}
+}
+
+func InitAppCfg(appName string) {
+	source := grpc.NewSource(
+		grpc.WithAddress(env_config.EnvConfig.ConfigAddress),
+		grpc.WithPath("micro"),
+	)
+
+	Init(
+		config.WithSource(source),
+		config.WithApp(appName),
+	)
+
 }
