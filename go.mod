@@ -13,6 +13,9 @@ require (
 	github.com/micro/cli v0.2.0
 	github.com/micro/go-micro v1.10.0
 	github.com/micro/go-plugins v1.3.0
+	github.com/micro/micro v1.10.0
+	github.com/opentracing/opentracing-go v1.1.0
+	github.com/uber/jaeger-client-go v2.16.0+incompatible
 	go.uber.org/zap v1.10.0
 	google.golang.org/grpc v1.22.1
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0

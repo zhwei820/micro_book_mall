@@ -3,17 +3,7 @@ GOPATH:=$(shell go env GOPATH)
 
 .PHONY: buildall
 buildall:
-	cd ./auth; make build; make docker;
-	cd ./config-grpc-srv; make build; make docker;
-	cd ./inventory-srv; make build; make docker;
-	cd ./orders-srv; make build; make docker;
-	cd ./orders-web; make build; make docker;
-	cd ./payment-srv; make build; make docker;
-	cd ./payment-web; make build; make docker;
-	cd ./user-srv; make build; make docker;
-	cd ./user-web; make build; make docker;
-
-buildallraw:
+	cd ./gateway; make build; make build;
 	cd ./auth; make build; make build;
 	cd ./config-grpc-srv; make build; make build;
 	cd ./inventory-srv; make build; make build;
@@ -26,6 +16,7 @@ buildallraw:
 
 .PHONY: clean
 clean:
+	cd ./gateway; rm ./gateway | true;rm ./nohup.out | true;
 	cd ./config-grpc-srv; rm ./config-grpc-srv | true;rm ./nohup.out | true;
 	cd ./auth; rm ./auth-srv | true;rm ./nohup.out | true;
 	cd ./inventory-srv; rm ./inventory-srv | true;rm ./nohup.out | true;
@@ -37,6 +28,7 @@ clean:
 	cd ./user-web; rm ./user-web | true; rm ./nohup.out | true;
 
 restartall:
+	cd ./gateway; ps -ef|grep gateway|grep -v grep|cut -c 9-15|xargs kill -9 | true; nohup ./gateway &
 	export ConfigAddress=10.35.195.58:9600; cd ./config-grpc-srv; ps -ef|grep config-grpc-srv|grep -v grep|cut -c 9-15|xargs kill -9 | true; nohup ./config-grpc-srv &
 	export ConfigAddress=10.35.195.58:9600; cd ./auth; ps -ef|grep auth-srv|grep -v grep|cut -c 9-15|xargs kill -9 | true; nohup ./auth-srv &>nohup.out; nohup ./auth-srv &>nohup.out; nohup ./auth-srv &>nohup.out;
 	export ConfigAddress=10.35.195.58:9600; cd ./inventory-srv; ps -ef|grep inventory-srv|grep -v grep|cut -c 9-15|xargs kill -9 | true; nohup ./inventory-srv &>nohup.out; nohup ./inventory-srv &>nohup.out; nohup ./inventory-srv &>nohup.out;

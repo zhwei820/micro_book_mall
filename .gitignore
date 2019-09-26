@@ -29,3 +29,4 @@ payment-srv/payment-srv
 payment-web/payment-web
 user-srv/user-srv
 user-web/user-web
+gateway/gateway

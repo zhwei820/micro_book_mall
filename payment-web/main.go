@@ -8,7 +8,6 @@ import (
 	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/payment-web/handler"
 	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/utils"
 	"github.com/micro/cli"
-	"github.com/micro/go-micro/registry"
 	"github.com/micro/go-micro/registry/consul"
 
 	logzap "github.com/micro-in-cn/tutorials/microservice-in-micro/part5/plugins/zap"
