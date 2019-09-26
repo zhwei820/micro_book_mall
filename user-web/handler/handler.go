@@ -4,14 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/micro/go-micro/client"
 	"net/http"
+	"strconv"
 	"time"
 
+	hystrix_go "github.com/afex/hystrix-go/hystrix"
 	auth "github.com/micro-in-cn/tutorials/microservice-in-micro/part5/auth/proto/auth"
 	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/plugins/session"
 	logzap "github.com/micro-in-cn/tutorials/microservice-in-micro/part5/plugins/zap"
 	us "github.com/micro-in-cn/tutorials/microservice-in-micro/part5/user-srv/proto/user"
-	"github.com/micro/go-micro/client"
+	"github.com/micro/go-plugins/wrapper/breaker/hystrix"
 )
 
 var (
@@ -30,8 +33,20 @@ type Error struct {
 }
 
 func Init() {
-	serviceClient = us.NewUserService("mu.micro.book.srv.user", client.DefaultClient)
-	authClient = auth.NewService("mu.micro.book.srv.auth", client.DefaultClient)
+	//serviceClient = us.NewUserService("mu.micro.book.srv.user", client.DefaultClient)
+	//authClient = auth.NewService("mu.micro.book.srv.auth", client.DefaultClient)
+	hystrix_go.DefaultVolumeThreshold = 1
+	hystrix_go.DefaultErrorPercentThreshold = 1
+	cl := hystrix.NewClientWrapper()(client.DefaultClient)
+	cl.Init(
+		client.Retries(3),
+		client.Retry(func(ctx context.Context, req client.Request, retryCount int, err error) (bool, error) {
+			log.Info(req.Method() + " " + strconv.Itoa(retryCount) + " client retry")
+			return true, nil
+		}),
+	)
+	serviceClient = us.NewUserService("mu.micro.book.srv.user", cl)
+	authClient = auth.NewService("mu.micro.book.srv.auth", cl)
 }
 
 // Login 登录入口

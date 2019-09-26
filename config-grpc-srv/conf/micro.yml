@@ -1,12 +1,12 @@
 micro:
   consul:
     enabled: true
-    host: 10.9.141.21
+    host: 10.35.195.58
     port: 8501
   db:
     mysql:
       enabled: true
-      url: root:rootroot@(10.9.141.21:3306)/micro_book_mall?charset=utf8&parseTime=true
+      url: root:rootroot@(10.35.195.58:3306)/micro_book_mall?charset=utf8&parseTime=true
       maxIdleConnection: 100
       maxOpenConnection: 130
   inv_srv:
@@ -25,14 +25,14 @@ micro:
     name: mu.micro.book.web.payment
   redis:
     enabled: true
-    conn: 10.9.141.21:6380
+    conn: 10.35.195.58:6380
     dbNum: 8
     password: root
     timeout: 3000
     sentinel:
       enabled: false
       master: bookMaster
-      nodes: 10.9.141.21:16379,10.9.141.21:26379,10.9.141.21:36379
+      nodes: 10.35.195.58:16379,10.35.195.58:26379,10.35.195.58:36379
   user_srv:
     name: mu.micro.book.srv.user
   user_web:
