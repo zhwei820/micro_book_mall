@@ -10,6 +10,8 @@ require (
 	github.com/golang/protobuf v1.3.2
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/sessions v1.2.0
+	github.com/labstack/echo v3.3.10+incompatible
+	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/micro/cli v0.2.0
 	github.com/micro/go-micro v1.10.0
 	github.com/micro/go-plugins v1.3.0

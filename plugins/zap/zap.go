@@ -1,6 +1,7 @@
 package zap
 
 import (
+	"context"
 	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/basic"
 	"github.com/micro-in-cn/tutorials/microservice-in-micro/part5/basic/config"
 	"go.uber.org/zap"
@@ -27,11 +28,47 @@ func init() {
 }
 
 type Logger struct {
-	*zap.Logger
+	zl *zap.Logger
 	sync.RWMutex
 	Opts      *Options `json:"opts"`
 	zapConfig zap.Config
 	inited    bool
+}
+
+// Debug logs a message at DebugLevel. The message includes any fields passed
+// at the log site, as well as any fields accumulated on the logger.
+func (log *Logger) Debug(ctx context.Context, msg string, fields ...zap.Field) {
+	log.zl.Debug(msg, zap.Field{
+		Key:    "trace-id",
+		Type:   zapcore.StringType,
+		String: ctx.Value("trace-id").(string)})
+}
+
+// Info logs a message at InfoLevel. The message includes any fields passed
+// at the log site, as well as any fields accumulated on the logger.
+func (log *Logger) Info(ctx context.Context, msg string, fields ...zap.Field) {
+	log.zl.Info(msg, zap.Field{
+		Key:    "trace-id",
+		Type:   zapcore.StringType,
+		String: ctx.Value("trace-id").(string)})
+}
+
+// Warn() logs a message at Warn()Level. The message includes any fields passed
+// at the log site, as well as any fields accumulated on the logger.
+func (log *Logger) Warn(ctx context.Context, msg string, fields ...zap.Field) {
+	log.zl.Warn(msg, zap.Field{
+		Key:    "trace-id",
+		Type:   zapcore.StringType,
+		String: ctx.Value("trace-id").(string)})
+}
+
+// Error() logs a message at Error()Level. The message includes any fields passed
+// at the log site, as well as any fields accumulated on the logger.
+func (log *Logger) Error(ctx context.Context, msg string, fields ...zap.Field) {
+	log.zl.Error(msg, zap.Field{
+		Key:    "trace-id",
+		Type:   zapcore.StringType,
+		String: ctx.Value("trace-id").(string)})
 }
 
 func initLogger() {
@@ -40,13 +77,13 @@ func initLogger() {
 	defer l.Unlock()
 
 	if l.inited {
-		l.Info("[initLogger] logger Inited")
+		l.Info(context.Background(), "[initLogger] logger Inited")
 		return
 	}
 
 	l.loadCfg()
 	l.init()
-	l.Info("[initLogger] zap plugin initializing completed")
+	l.zl.Info("[initLogger] zap plugin initializing completed")
 	l.inited = true
 }
 
@@ -60,12 +97,12 @@ func (l *Logger) init() {
 	l.setSyncers()
 	var err error
 
-	l.Logger, err = l.zapConfig.Build(l.cores())
+	l.zl, err = l.zapConfig.Build(l.cores())
 	if err != nil {
 		panic(err)
 	}
 
-	defer l.Logger.Sync()
+	defer l.zl.Sync()
 }
 
 func (l *Logger) loadCfg() {
